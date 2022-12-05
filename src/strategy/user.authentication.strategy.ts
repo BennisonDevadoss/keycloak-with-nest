@@ -5,11 +5,7 @@ import { UserInstance } from 'src/dto/users.dto';
 import { KEYCLOAK_APIS } from 'src/config/constants';
 import { FastifyRequest } from 'fastify';
 
-import {
-  Injectable,
-  NestMiddleware,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, NestMiddleware } from '@nestjs/common';
 
 declare module 'fastify' {
   interface FastifyRequest {
@@ -33,7 +29,6 @@ export class UserAuthMiddleware implements NestMiddleware {
     };
     return axios(config)
       .then(async (user) => {
-        // console.log(user);
         const currentUser = await this.userService.getUserByUserName(
           user.data.preferred_username,
         );
@@ -42,7 +37,6 @@ export class UserAuthMiddleware implements NestMiddleware {
           access_token: token,
           user_id: user.data.sub,
         };
-        // console.log(req.user);
         next();
       })
       .catch((error) => {

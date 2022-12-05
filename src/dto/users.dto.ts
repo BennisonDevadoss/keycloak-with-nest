@@ -29,3 +29,20 @@ export class UserCreateDto {
   @ApiProperty({ required: false })
   mobile_no: string;
 }
+
+export class UserUpdateDto {
+  @IsString()
+  @IsOptional()
+  @ApiProperty({ required: false })
+  first_name: string;
+
+  @IsString()
+  @IsOptional()
+  @ApiProperty({ required: false })
+  last_name: string;
+
+  @IsEmail()
+  @IsOptional()
+  @ApiProperty({ required: false })
+  mobile_no: string;
+}

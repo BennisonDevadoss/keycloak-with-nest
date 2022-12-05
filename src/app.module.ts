@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { PrismaService } from './config/database';
 import { SessionModule } from './modules/session/session.module';
+import { PasswordModule } from './modules/password/password.module';
 import { UserAuthMiddleware } from './strategy/user.authentication.strategy';
 
 import {
@@ -13,12 +14,11 @@ import {
   RequestMethod,
   MiddlewareConsumer,
 } from '@nestjs/common';
-import { PasswordModule } from './modules/password/password.module';
 
 @Module({
-  controllers: [AppController],
   imports: [SessionModule, UserModule, PasswordModule],
   providers: [AppService, UserService, PrismaService, ConfigService],
+  controllers: [AppController],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
@@ -27,6 +27,7 @@ export class AppModule implements NestModule {
       .forRoutes(
         { path: 'users', method: RequestMethod.POST },
         { path: 'logout', method: RequestMethod.DELETE },
+        { path: 'users/*', method: RequestMethod.ALL },
         { path: 'password/*', method: RequestMethod.PUT },
       );
   }

@@ -11,8 +11,8 @@ export const KEYCLOAK = {
 };
 
 export const KEYCLOAK_APIS = {
-  logout: `${KEYCLOAK.baseUrl}/realms/${KEYCLOAK.realm}/protocol/openid-connect/logout`,
   users: `${KEYCLOAK.baseUrl}/admin/realms/${KEYCLOAK.realm}/users`,
+  logout: `${KEYCLOAK.baseUrl}/realms/${KEYCLOAK.realm}/protocol/openid-connect/logout`,
   createUser: `${KEYCLOAK.baseUrl}/admin/realms/${KEYCLOAK.realm}/users`,
   validateToken: `${KEYCLOAK.baseUrl}/realms/${KEYCLOAK.realm}/protocol/openid-connect/userinfo`,
 };

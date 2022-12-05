@@ -1,7 +1,6 @@
 import logger from 'src/config/logger';
 
 import { AxiosError } from 'axios';
-
 import { AbstractHttpAdapter } from '@nestjs/core';
 
 import {
@@ -19,24 +18,13 @@ import {
   PrismaClientInitializationError,
 } from '@prisma/client/runtime';
 
-class AxiosException extends Error {
-  constructor(error: any) {
-    var json = error.toJSON();
-    json.name = AxiosException.name;
-
-    super(JSON.stringify(json, undefined, 2));
-
-    Object.assign(this, error);
-  }
-}
-
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
   constructor(private readonly httpAdapterHost: AbstractHttpAdapter) {}
-  catch(exception: unknown, host: ArgumentsHost): void {
+
+  catch(exception: any, host: ArgumentsHost): void {
     console.log(exception);
-    // logger.error(exception);
-    console.log(exception instanceof AxiosError);
+    logger.error(exception);
     let errorMessage: unknown;
     let responseObject: any;
     let httpStatus: number;
@@ -73,7 +61,15 @@ export class HttpExceptionFilter implements ExceptionFilter {
       httpStatus = exception.response?.status
         ? exception.response?.status
         : 500;
-      errorMessage = exception.response?.data.errorMessage;
+
+      if (exception.response?.data.errorMessage) {
+        errorMessage = exception.response?.data.errorMessage;
+      } else if (exception.response?.data.error_description) {
+        errorMessage = exception.response?.data.error_description;
+      }
+    } else if (exception.errors) {
+      httpStatus = 401;
+      errorMessage = exception.errors;
     } else {
       httpStatus = 500;
       errorMessage = [

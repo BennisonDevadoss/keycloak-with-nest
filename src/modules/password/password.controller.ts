@@ -4,10 +4,13 @@ import { FastifyRequest, FastifyReply } from 'fastify';
 import { ChangePasswordDto, ResetPasswordDto } from 'src/dto/password.dto';
 
 import { Body, Controller, Post, Put, Req, Res } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('password')
 @Controller('password')
 export class PasswordController {
   constructor(private passwordService: PasswordService) {}
+
   @Put('change_password')
   async changePassword(
     @Req() req: any,
@@ -20,7 +23,6 @@ export class PasswordController {
       await this.passwordService.changePassword(params, currentUser);
       reply.send({ message: 'Password has been changed successfully' });
     } catch (error) {
-      console.log(error);
       reply.send(error);
     }
   }

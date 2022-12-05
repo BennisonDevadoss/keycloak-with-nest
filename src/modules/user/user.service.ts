@@ -1,6 +1,7 @@
 import axios from 'axios';
 import * as moment from 'moment';
 
+import { size } from 'lodash';
 import { PrismaService } from 'src/config/database';
 import { KEYCLOAK_APIS } from 'src/config/constants';
 
@@ -15,6 +16,16 @@ import {
 @Injectable()
 export class UserService {
   constructor(private prisma: PrismaService) {}
+
+  private async getUserById(userId: number) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+    if (!user) throw new NotFoundException('User not found');
+    return user;
+  }
 
   async getUserNameByEmail(email: string) {
     const user = await this.prisma.user.findFirst({
@@ -49,7 +60,7 @@ export class UserService {
       };
       const response = await axios(config);
       const createdUser = response.data;
-      if (!createdUser) throw new NotFoundException('User not found');
+      if (!size(createdUser)) throw new NotFoundException('User not found');
       return createdUser;
     } catch (error) {
       throw error;
@@ -99,7 +110,7 @@ export class UserService {
       await axios(config);
 
       /* get created user details from keycloak */
-      await this.prisma.user.create({
+      const user = await this.prisma.user.create({
         data: {
           email: attrs.email,
           username: userName,
@@ -117,8 +128,63 @@ export class UserService {
 
       /* send invitation link to created user */
       await this.sendInvitationEmailToUser(createdUser[0].id, accessToken);
+      return user;
     } catch (error) {
       throw error;
     }
+  }
+
+  async update(userId: number, attrs: any, currentUser: UserInstance) {
+    const user = await this.getUserById(userId);
+    const { username } = user;
+    const { access_token: accessToken } = currentUser;
+
+    const keycloakUserData = await this.getUserDetailFromKeyCloak(
+      username,
+      accessToken,
+    );
+
+    const keycloakUserUpdateData = {
+      lastName: attrs.last_name,
+      firstName: attrs.first_name,
+    };
+    const config = {
+      method: 'PUT',
+      url: `${KEYCLOAK_APIS.users}/${keycloakUserData[0].id}`,
+      headers: {
+        Authorization: currentUser.access_token,
+        'Content-Type': 'application/json',
+      },
+      data: JSON.stringify(keycloakUserUpdateData),
+    };
+    await axios(config);
+    return await this.prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: attrs,
+    });
+  }
+
+  async destroy(userId: number, currentUser: UserInstance) {
+    const user = await this.getUserById(userId);
+    const { username } = user;
+    const { access_token: accessToken } = currentUser;
+
+    const keycloakUserData = await this.getUserDetailFromKeyCloak(
+      username,
+      accessToken,
+    );
+    const config = {
+      method: 'DELETE',
+      url: `${KEYCLOAK_APIS.users}/${keycloakUserData[0].id}`,
+      headers: {
+        Authorization: currentUser.access_token,
+        'Content-Type': 'application/json',
+      },
+      data: JSON.stringify({}),
+    };
+    await axios(config);
+    await this.prisma.user.delete({ where: { id: userId } });
   }
 }

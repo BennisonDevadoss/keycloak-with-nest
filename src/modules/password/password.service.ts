@@ -18,7 +18,7 @@ export class PasswordService {
 
       if (password !== confirm_new_password)
         throw new UnprocessableEntityException(
-          "confirm password doesn't match password ",
+          "confirm password doesn't match password",
         );
 
       const data = JSON.stringify({
@@ -41,7 +41,8 @@ export class PasswordService {
       throw error;
     }
   }
-  
+
+  /* NOTE: NOT YET IMPLEMENTED */
   async sendResetPasswordInstruction(token: string, email: string) {
     const data = JSON.stringify(['UPDATE_PASSWORD']);
     const config = {

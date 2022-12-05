@@ -1,3 +1,4 @@
+import { ApiTags } from '@nestjs/swagger';
 import { SigninDto } from 'src/dto/session.dto';
 import { SessionService } from './session.service';
 
@@ -13,9 +14,11 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 
+@ApiTags('session')
 @Controller()
 export class SessionController {
   constructor(private sessionService: SessionService) {}
+
   @Post('login')
   async login(@Body() params: SigninDto, @Res() reply: FastifyReply) {
     try {
