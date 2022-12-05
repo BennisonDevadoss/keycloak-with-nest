@@ -4,6 +4,6 @@ import { PasswordController } from './password.controller';
 
 @Module({
   providers: [PasswordService],
-  controllers: [PasswordController]
+  controllers: [PasswordController],
 })
 export class PasswordModule {}
